@@ -1,12 +1,10 @@
 #ifndef DRAGWIDGET_H
 #define DRAGWIDGET_H
 
-#include <QtCore>
-#include <QtGui>
-
-#if QT_VERSION >= 0x050000
-	#include <QtWidgets>
-#endif
+#include <QWidget>
+#include <QMouseEvent>
+#include <QPaintEvent>
+#include <QPoint>
 
 class DragWidget : public QWidget
 {

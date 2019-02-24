@@ -12,23 +12,15 @@
 #ifndef DOCKADAPTOR_H_1550940326
 #define DOCKADAPTOR_H_1550940326
 
-#include <QtCore>
-#include <QtGui>
-
-#if QT_VERSION >= 0x050000
-	#include <QtWidgets>
-#endif
-
 #include "kbddock.h"
 
-class QByteArray;
+#include <QObject>
+#include <QMap>
+#include <QList>
+#include <QDBusAbstractAdaptor>
 
 template<class T> class QList;
 template<class Key, class Value> class QMap;
-
-class QString;
-class QStringList;
-class QVariant;
 
 /*
  * Adaptor class for interface org.corebox.kvkbd.Dock

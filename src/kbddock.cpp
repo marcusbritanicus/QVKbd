@@ -19,7 +19,10 @@
  * Boston, MA 02110-1301, USA.
  */
 
+#include "dockadaptor.h"
 #include "kbddock.h"
+
+#include "fixx11h.h"
 
 #include <QDBusConnection>
 #include <QtCore>
@@ -28,8 +31,6 @@
 #if QT_VERSION >= 0x050000
 	#include <QtWidgets>
 #endif
-
-#include "dockadaptor.h"
 
 #include <iostream>
 using namespace std;

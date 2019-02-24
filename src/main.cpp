@@ -20,12 +20,17 @@
  */
 
 #include "kvkbdapp.h"
-
 #include <X11/Xlib.h>
+
+#include "fixx11h.h"
+
+#include <QDebug>
 
 int main( int argc, char **argv ) {
 
 	KvkbdApp *app = new KvkbdApp(  argc, argv  );
+
+	qDebug() << "Hello";
 
 	return app->exec();
 };

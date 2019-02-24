@@ -1,5 +1,4 @@
 #include "vbutton.h"
-#include <QPainter>
 
 #define TIMER_INTERVAL_SHORT 40
 #define TIMER_INTERVAL_LONG  200
@@ -8,9 +7,7 @@ int VButton::RepeatShortDelay = TIMER_INTERVAL_SHORT;
 int VButton::RepeatLongDelay = TIMER_INTERVAL_LONG;
 
 
-VButton::VButton(QWidget *parent) :
-    QPushButton(parent)
-{
+VButton::VButton(QWidget *parent) : QPushButton(parent) {
 
     setFocusPolicy(Qt::NoFocus);
     setAttribute(Qt::WA_AlwaysShowToolTips);

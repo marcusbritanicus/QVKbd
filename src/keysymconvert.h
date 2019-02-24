@@ -9,10 +9,10 @@
 
 #include <X11/X.h>
 
-class KeySymConvert
-{
-public:
-    long convert(KeySym keysym);
+class KeySymConvert {
+
+	public:
+		long convert(KeySym keysym);
 };
 
 #endif // KEYSYM2UCS_H

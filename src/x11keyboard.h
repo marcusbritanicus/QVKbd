@@ -22,46 +22,38 @@
 
 #include "keysymconvert.h"
 #include "fixx11h.h"
-
 #include "vkeyboard.h"
 
-#include <QtCore>
-#include <QtGui>
+#include <QStringList>
+#include <QTimer>
 
-#if QT_VERSION >= 0x050000
-	#include <QtWidgets>
-#endif
-
-class X11Keyboard : public VKeyboard
-{
+class X11Keyboard : public VKeyboard {
     Q_OBJECT
 
-public:
-    X11Keyboard(QObject *parent=0);
-    virtual ~X11Keyboard();
-    void textForKeyCode(unsigned int keyCode, ButtonText& text);
+	public:
+		X11Keyboard(QObject *parent=0);
+		virtual ~X11Keyboard();
+		void textForKeyCode(unsigned int keyCode, ButtonText& text);
 
-public slots:
-    virtual void processKeyPress(unsigned int);
-    virtual void queryModState();
-    virtual void constructLayouts();
-    virtual void layoutChanged();
-    virtual void start();
+	public slots:
+		virtual void processKeyPress(unsigned int);
+		virtual void queryModState();
+		virtual void constructLayouts();
+		virtual void layoutChanged();
+		virtual void start();
 
-protected:
+	protected:
+		void sendKey(unsigned int keycode);
 
-    void sendKey(unsigned int keycode);
+		QStringList layouts;
+		int layout_index;
 
-    QStringList layouts;
-    int layout_index;
-
-    KeySymConvert kconvert;
+		KeySymConvert kconvert;
 
 
-    bool queryModKeyState(KeySym keyCode);
-    ModifierGroupStateMap groupState;
-    QTimer *groupTimer;
-
+		bool queryModKeyState(KeySym keyCode);
+		ModifierGroupStateMap groupState;
+		QTimer *groupTimer;
 };
 
 #endif // X11KEYBOARD_H

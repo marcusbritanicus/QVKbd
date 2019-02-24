@@ -1,5 +1,13 @@
 #include "dragwidget.h"
 
+#include <iostream>
+using namespace std;
+
+#include <X11/Xatom.h>
+#include <X11/Xlib.h>
+
+#include "fixx11h.h"
+
 #include <QtCore>
 #include <QtGui>
 
@@ -8,16 +16,6 @@
 #endif
 
 #include <QX11Info>
-
-#include <iostream>
-using namespace std;
-
-
-#include <X11/Xatom.h>
-#include <X11/Xlib.h>
-
-#include <fixx11h.h>
-
 
 DragWidget::DragWidget(QWidget *parent) :
     QWidget(parent),  dragged(false), moved(false), locked(false)

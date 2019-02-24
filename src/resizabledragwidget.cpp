@@ -20,6 +20,8 @@
 
 #include "resizabledragwidget.h"
 
+#include "vkeyboard.h"
+
 #include <QtCore>
 #include <QtGui>
 

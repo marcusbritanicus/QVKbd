@@ -12,16 +12,9 @@
 #ifndef KVKBDADAPTOR_H_1550940326
 #define KVKBDADAPTOR_H_1550940326
 
-#include <QtCore>
-#include <QtGui>
-
-#if QT_VERSION >= 0x050000
-	#include <QtWidgets>
-#endif
+#include "mainwidget.h"
 
 #include <QDBusAbstractAdaptor>
-
-#include "mainwidget.h"
 
 class QByteArray;
 

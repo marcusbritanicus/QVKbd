@@ -10,6 +10,8 @@
 
 #include "dockadaptor.h"
 
+#include "fixx11h.h"
+
 #include <QtCore>
 #include <QtGui>
 

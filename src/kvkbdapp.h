@@ -20,19 +20,17 @@
 #ifndef KVKBDAPP_H
 #define KVKBDAPP_H
 
-#include <QtCore>
-#include <QtGui>
-
-#if QT_VERSION >= 0x050000
-	#include <QtWidgets>
-#endif
-
 #include "resizabledragwidget.h"
 #include "mainwidget.h"
 #include "kbdtray.h"
 #include "vbutton.h"
 #include "themeloader.h"
 #include "vkeyboard.h"
+
+#include <QApplication>
+#include <QSignalMapper>
+#include <QGridLayout>
+#include <QLabel>
 
 class KvkbdApp : public QApplication {
 	Q_OBJECT

@@ -20,19 +20,11 @@
 #ifndef THEMELOADER_H
 #define THEMELOADER_H
 
-#include <QDomNode>
-#include <QDomNamedNodeMap>
-
-#include <QtCore>
-#include <QtGui>
-
-#if QT_VERSION >= 0x050000
-	#include <QtWidgets>
-#endif
-
 #include "mainwidget.h"
 #include "vbutton.h"
 
+#include <QDomNode>
+#include <QDomNamedNodeMap>
 
 class ThemeLoader : public QObject
 {

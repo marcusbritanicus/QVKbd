@@ -1,6 +1,8 @@
 #include "mainwidget.h"
 #include "vbutton.h"
 
+#include "fixx11h.h"
+
 #include <QtCore>
 #include <QtGui>
 

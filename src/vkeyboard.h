@@ -20,12 +20,11 @@
 #ifndef VKEYBOARD_H
 #define VKEYBOARD_H
 
-#include <QtCore>
-#include <QtGui>
-
-#if QT_VERSION >= 0x050000
-	#include <QtWidgets>
-#endif
+#include <QObject>
+#include <QString>
+#include <QMap>
+#include <QList>
+#include <QChar>
 
 //caps state, numlock state
 typedef QMap<QString, bool> ModifierGroupStateMap;
@@ -33,31 +32,30 @@ typedef QMapIterator<QString, bool> ModifierGroupStateMapIterator;
 //normal text, shift text
 typedef QList<QChar> ButtonText;
 
-class VKeyboard : public QObject
-{
+class VKeyboard : public QObject {
     Q_OBJECT
 
-public:
-    VKeyboard(QObject *parent=0);
-    virtual ~VKeyboard();
+	public:
+		VKeyboard(QObject *parent=0);
+		virtual ~VKeyboard();
 
-    virtual void textForKeyCode(unsigned int keyCode, ButtonText& text)=0;
+		virtual void textForKeyCode(unsigned int keyCode, ButtonText& text)=0;
 
-public slots:
-    virtual void processKeyPress(unsigned int)=0;
-    virtual void queryModState()=0;
-    virtual void constructLayouts()=0;
-    virtual void layoutChanged()=0;
-    virtual void start()=0;
+	public slots:
+		virtual void processKeyPress(unsigned int)=0;
+		virtual void queryModState()=0;
+		virtual void constructLayouts()=0;
+		virtual void layoutChanged()=0;
+		virtual void start()=0;
 
-signals:
-    //key sent successfully
-    void keyProcessComplete(unsigned int);
+	signals:
+		//key sent successfully
+		void keyProcessComplete(unsigned int);
 
-    void groupStateChanged(const ModifierGroupStateMap& modifier_state);
+		void groupStateChanged(const ModifierGroupStateMap& modifier_state);
 
-    //layout index in list, layout caption
-    void layoutUpdated(int, QString);
+		//layout index in list, layout caption
+		void layoutUpdated(int, QString);
 };
 
 #endif // VKEYBOARD_H

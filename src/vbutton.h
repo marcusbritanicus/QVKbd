@@ -1,18 +1,17 @@
 #ifndef VBUTTON_H
 #define VBUTTON_H
 
-#include <QtCore>
-#include <QtGui>
+#include "vkeyboard.h"
 
-#if QT_VERSION >= 0x050000
-	#include <QtWidgets>
-#endif
-
+#include <QWidget>
+#include <QPushButton>
 #include <QDomNode>
-#include "x11keyboard.h"
+#include <QRect>
+#include <QSize>
+#include <QTimer>
+#include <QMouseEvent>
 
-class VButton : public QPushButton
-{
+class VButton : public QPushButton {
     Q_OBJECT
 
 public:

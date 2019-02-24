@@ -19,6 +19,8 @@
 
 #include "themeloader.h"
 
+#include "fixx11h.h"
+
 #include <QtCore>
 #include <QtGui>
 

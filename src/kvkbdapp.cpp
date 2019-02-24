@@ -20,16 +20,15 @@
 
 #include "kvkbdapp.h"
 
-#include <QtCore>
-#include <QtGui>
-
-#if QT_VERSION >= 0x050000
-	#include <QtWidgets>
-#endif
-
 #include <X11/Xatom.h>
 #include <X11/Xlib.h>
-#include <fixx11h.h>
+
+#include "fixx11h.h"
+
+#include <QWidgetAction>
+#include <QDesktopWidget>
+#include <QDebug>
+#include <QFontDialog>
 
 QList<VButton*> modKeys;
 #include <iostream>
@@ -159,6 +158,7 @@ KvkbdApp::KvkbdApp( int argc, char *argv[] ) : QApplication( argc, argv ) {
 	emit fontUpdated( widget->font() );
 
 	xkbd->start();
+
 	bool vis = true; //cfg.readEntry( "visible", QVariant( true ) ).toBool();
 
 	if ( !vis  ) {
@@ -166,6 +166,8 @@ KvkbdApp::KvkbdApp( int argc, char *argv[] ) : QApplication( argc, argv ) {
 	}
 	widget->setWindowTitle( "Kvkbd" );
 	tray->show();
+
+	qDebug() << "App init complete.";
 }
 
 KvkbdApp::~KvkbdApp()

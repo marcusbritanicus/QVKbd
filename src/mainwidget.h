@@ -1,14 +1,9 @@
 #ifndef MAINWIDGET_H
 #define MAINWIDGET_H
 
-#include <QtCore>
-#include <QtGui>
-
-#if QT_VERSION >= 0x050000
-	#include <QtWidgets>
-#endif
-
 #include "vkeyboard.h"
+
+#include <QWidget>
 
 class MainWidget : public QWidget {
 

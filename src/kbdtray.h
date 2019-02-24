@@ -19,12 +19,10 @@
 #ifndef KBDTRAY_H
 #define KBDTRAY_H
 
-#include <QtCore>
-#include <QtGui>
-
-#if QT_VERSION >= 0x050000
-	#include <QtWidgets>
-#endif
+#include <QObject>
+#include <QWidget>
+#include <QSystemTrayIcon>
+#include <QMenu>
 
 class KbdTray : public QSystemTrayIcon {
 
