@@ -1,6 +1,6 @@
 /*
 	*
-	* This file is a part of CuboCore Project
+	* This file is a part of QVKbd Project.
 	* Copyright 2019 Britanicus <marcusbritanicus@gmail.com>
 	*
 
@@ -24,8 +24,12 @@
 	*
 */
 
+// X11 Headers
+#include <X11/X.h>
+#include "fixx11h.h"
+
 // Local Headers
-#include "CCVirtualKeyboard.hpp"
+#include "QVirtualKeyboard.hpp"
 
 #include <QStringList>
 #include <QVBoxLayout>
@@ -34,11 +38,21 @@
 #include <QApplication>
 #include <QSettings>
 #include <QSystemTrayIcon>
+#include <QX11Info>
+
+#include <X11/extensions/XTest.h>
+#include <X11/Xlocale.h>
+#include <X11/Xos.h>
+#include <X11/Xlib.h>
+#include <X11/Xutil.h>
+#include <X11/Xproto.h>
+
+#include <X11/XKBlib.h>
 
 const int DEFAULT_KEY_WIDTH = 36;
 const int DEFAULT_KEY_HEIGHT = 36;
 
-CCKeyboardButton::CCKeyboardButton( unsigned int code, QString name, QWidget *parent ) : QPushButton( parent ) {
+QKeyboardButton::QKeyboardButton( unsigned int code, QString name, QWidget *parent ) : QPushButton( parent ) {
 
 	value = code;
 
@@ -48,20 +62,20 @@ CCKeyboardButton::CCKeyboardButton( unsigned int code, QString name, QWidget *pa
 	setMinimumSize( DEFAULT_KEY_WIDTH, DEFAULT_KEY_HEIGHT );
 };
 
-void CCKeyboardButton::translateKeyStroke() {
+void QKeyboardButton::translateKeyStroke() {
 
 	emit sendKey( int( value ) );
 };
 
-CCVirtualKeyboard::CCVirtualKeyboard( QWidget *parent ) : QWidget( parent ) {
+QVirtualKeyboard::QVirtualKeyboard( QWidget *parent ) : QWidget( parent ) {
+
+	modifierCodes << 50 << 62 << 37 << 133 << 64 << 108 << 135 << 109;
 
 	createKeyboard();
 	setWidgetProperties();
 };
 
-void CCVirtualKeyboard::createKeyboard() {
-
-	xkbd = new X11Keyboard( this );
+void QVirtualKeyboard::createKeyboard() {
 
 	QSettings keymap( ":/resources/en_US.keymap", QSettings::NativeFormat );
 
@@ -81,8 +95,18 @@ void CCVirtualKeyboard::createKeyboard() {
 			QString keyName = keymap.value( key ).toString();
 			unsigned int keyCode = key.toInt();
 
-			CCKeyboardButton *btn = new CCKeyboardButton( keyCode, keyName, this );
-			connect( btn, SIGNAL( sendKey( unsigned int ) ), xkbd, SLOT( processKeyPress( unsigned int ) ) );
+			QKeyboardButton *btn = new QKeyboardButton( keyCode, keyName, this );
+
+			if ( not modifierCodes.contains( keyCode ) ) {
+
+				connect( btn, SIGNAL( sendKey( unsigned int ) ), this, SLOT( processKeyPress( unsigned int ) ) );
+			}
+
+			else {
+				modifiers << btn;
+				btn->setCheckable( true );
+				btn->setChecked( false );
+			}
 
 			/* Function Keys */
 			if ( keyName.startsWith( "F" ) and not ( keyName == "F" ) ) {
@@ -102,7 +126,7 @@ void CCVirtualKeyboard::createKeyboard() {
 				btn->setMinimumWidth( DEFAULT_KEY_WIDTH - 2 );
 				btn->setFixedHeight( ( int )( DEFAULT_KEY_HEIGHT * 0.7 ) );
 
-				disconnect( btn, SIGNAL( sendKey( unsigned int ) ), xkbd, SLOT( processKeyPress( unsigned int ) ) );
+				disconnect( btn, SIGNAL( sendKey( unsigned int ) ), this, SLOT( processKeyPress( unsigned int ) ) );
 				connect( btn, SIGNAL( clicked() ), qApp, SLOT( quit() ) );
 			}
 
@@ -124,7 +148,7 @@ void CCVirtualKeyboard::createKeyboard() {
 				btn->setFixedWidth( ( int )DEFAULT_KEY_WIDTH * 0.9 );
 				btn->setFixedHeight( DEFAULT_KEY_HEIGHT );
 
-				disconnect( btn, SIGNAL( sendKey( unsigned int ) ), xkbd, SLOT( processKeyPress( unsigned int ) ) );
+				disconnect( btn, SIGNAL( sendKey( unsigned int ) ), this, SLOT( processKeyPress( unsigned int ) ) );
 				btn->setDisabled( true );
 			}
 
@@ -163,7 +187,7 @@ void CCVirtualKeyboard::createKeyboard() {
 	setLayout( keyboardLyt );
 };
 
-void CCVirtualKeyboard::setWidgetProperties() {
+void QVirtualKeyboard::setWidgetProperties() {
 
 	setWindowTitle( "CuboCore Virtual Keyboard" );
 	setWindowIcon( QIcon( ":/resources/tray.png" ) );
@@ -179,18 +203,58 @@ void CCVirtualKeyboard::setWidgetProperties() {
 	setFixedSize( 612, 220 );
 };
 
+void QVirtualKeyboard::processKeyPress( unsigned int keyCode ) {
+
+	sendKey( keyCode );
+
+    QListIterator<QKeyboardButton *> itr( modifiers );
+    while ( itr.hasNext() ) {
+        QKeyboardButton *mod = itr.next();
+        if ( mod->isChecked() ) {
+            mod->click();
+        }
+    }
+};
+
+void QVirtualKeyboard::sendKey( unsigned int keycode ) {
+
+	Window currentFocus;
+	int revertTo;
+
+	Display *display = QX11Info::display();
+	XGetInputFocus( display, &currentFocus, &revertTo );
+
+	QListIterator<QKeyboardButton *> itr( modifiers );
+	while ( itr.hasNext() ) {
+		QKeyboardButton *mod = itr.next();
+		if ( mod->isChecked() ) {
+			XTestFakeKeyEvent( display, mod->keyCode(), true, 2 );
+		}
+	}
+
+	XTestFakeKeyEvent( display, keycode, true, 2 );
+	XTestFakeKeyEvent( display, keycode, false, 2 );
+
+	itr.toFront();
+	while ( itr.hasNext() ) {
+		QKeyboardButton *mod = itr.next();
+		if ( mod->isChecked() )
+			XTestFakeKeyEvent( display, mod->keyCode(), false, 2 );
+	}
+
+	XFlush( display );
+}
+
 int main( int argc, char **argv ) {
 
 	QApplication app( argc, argv );
 
-	CCVirtualKeyboard Gui;
+	QVirtualKeyboard Gui;
 	Gui.show();
 
 	QSystemTrayIcon *tray = new QSystemTrayIcon();
 	tray->setIcon( QIcon( ":/resources/tray.png" ) );
 	tray->show();
-
-	qDebug() << Gui.size();
 
 	return app.exec();
 }

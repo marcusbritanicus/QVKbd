@@ -1,0 +1,15 @@
+QVirtualKeyboard v1.0.0
+
+UI
+	□ Beautify the UI with qss
+	✗ Enable other keyboard layouts
+
+Code
+	□ Document the code, specifically, what each line does when it comes to X11
+
+Note:
+	✍ - Work in progress
+	□ - Work to be started
+	✓ - Work Completed
+	✗ - Not working on this
+	◐ - Partially complete

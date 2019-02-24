@@ -1,17 +1,26 @@
-Kvkbd - A virtual keyboard for KDE4
-===============================================================================
+Kvkbd - A virtual keyboard for X11 based on Qt
+==============================================
+
 Dependencies:
-- cmake
-- kdelibs headers
-- libxtst (X11 Record extension library)
+	- Qt4 or Qt5 (QtWidgets and QtX11Extras needed for Qt5)
+	- libxtst (X11 Record extension library)
 
 On Debian systems, this can be installed with:
-sudo aptitude install cmake kdelibs5-dev libxtst-dev
+
+Qt5:
+	$ sudo aptitude install qtbase5-dev qtbase5-dev-tools qt5-qmake libqt5x11extras5-dev libxtst-dev
+
+Qt4:
+	$ sudo aptitude install libqt4-dev qt4-dev-tools qt4-qmake libxtst-dev
 
 Build instructions:
-mkdir build
-cd build
-cmake -DCMAKE_BUILD_TYPE=release -DCMAKE_INSTALL_PREFIX=$(kde-config --prefix) ..
-make
-Then, as root using sudo or su:
-make install
+
+Qt5:
+	$ qmake -qt5
+	$ make -kj$(nproc)
+	$ sudo make install
+
+Qt4:
+	$ qmake -qt5
+	$ make -kj$(nproc)
+	$ sudo make install
