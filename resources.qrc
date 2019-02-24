@@ -1,0 +1,7 @@
+<RCC>
+    <qresource>
+		<file>resources/standart.xml</file>
+		<file>resources/standart.css</file>
+		<file>resources/tray.png</file>
+    </qresource>
+</RCC>
