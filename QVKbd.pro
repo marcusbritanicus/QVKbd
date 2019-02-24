@@ -1,6 +1,8 @@
 TEMPLATE = app
 TARGET = qvkbd
 
+VERSION = 2.5.0
+
 INCLUDEPATH += .
 
 greaterThan( QT_MAJOR_VERSION, 4 ) {

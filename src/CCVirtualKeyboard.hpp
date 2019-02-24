@@ -17,21 +17,10 @@ class CCKeyboardButton : public QPushButton {
 	Q_OBJECT
 
 	public:
-		CCKeyboardButton( unsigned int code, QString name, QWidget *parent ) : QPushButton( parent ) {
-
-			value = code;
-
-			setText( name );
-			connect( this, SIGNAL( clicked() ), this, SLOT( translateKeyStroke() ) );
-
-			setMinimumSize( QSize( 36, 36 ) );
-		}
+		CCKeyboardButton( unsigned int code, QString name, QWidget *parent );
 
 	private Q_SLOTS:
-		void translateKeyStroke() {
-
-			emit sendKey( int( value ) );
-		};
+		void translateKeyStroke();
 
 	private:
 		unsigned int value;
