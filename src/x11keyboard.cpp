@@ -1,29 +1,31 @@
 /*
- * <one line to give the library's name and an idea of what it does.>
- * Copyright ( C ) 2014 Todor Gyumyushev <yodor1@gmail.com>
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * ( at your option ) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- *
- */
+	*
+	* This file is modified by Marcus Britanicus <marcusbritanicus@gmail.com>
+	* for use as a part of CuboCore Project.
+	*
+	* This file was originally written by Todor Gyumyushev <yodor1@gmail.com>
+	* as a part of Kvkbd project (https://github.com/KDE/kvkbd)
+	*
+	* This program is free software: you can redistribute it and/or modify
+	* it under the terms of the GNU General Public License as published by
+	* the Free Software Foundation, either version 3 of the License, or
+	* (at your option) any later version.
+	*
+	* This program is distributed in the hope that it will be useful,
+	* but WITHOUT ANY WARRANTY; without even the implied warranty of
+	* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	* GNU General Public License for more details.
+	*
+	* You should have received a copy of the GNU General Public License
+	* along with this program. If not, see <http://www.gnu.org/licenses/>.
+	*
+*/
 
 #include "x11keyboard.h"
 
 #include <QX11Info>
 #include <QDesktopWidget>
-#include <QDBusConnection>
-#include <QDBusInterface>
-#include <QDBusReply>
+#include <QDebug>
 
 #include <X11/extensions/XTest.h>
 #include <X11/Xlocale.h>
@@ -34,24 +36,11 @@
 
 #include <X11/XKBlib.h>
 
-#include "vbutton.h"
-extern QList<VButton *> modKeys;
-
 #include <iostream>
 using namespace std;
 
-X11Keyboard::X11Keyboard( QObject *parent ): VKeyboard( parent ) {
+X11Keyboard::X11Keyboard( QObject *parent ): QObject( parent ) {
 
-	QString service = "";
-	QString path = "/Layouts";
-	QString interface = "org.cubocore.KeyboardLayouts";
-
-	QDBusConnection session = QDBusConnection::sessionBus();
-
-	session.connect( service, path, interface, "currentLayoutChanged", this, SLOT( layoutChanged() ) );
-	session.connect( service, path, interface, "layoutListChanged", this, SLOT( constructLayouts() ) );
-
-	constructLayouts();
 	groupTimer = new QTimer( parent );
 	groupTimer->setInterval( 250 );
 
@@ -62,34 +51,16 @@ X11Keyboard::X11Keyboard( QObject *parent ): VKeyboard( parent ) {
 }
 
 X11Keyboard::~X11Keyboard() {
-
 }
 
 void X11Keyboard::start() {
 
-	layoutChanged();
 	emit groupStateChanged( groupState );
 	groupTimer->start();
 }
 
 void X11Keyboard::constructLayouts() {
-
-	QDBusInterface iface( "org.cubocore.keyboard", "/Layouts", "org.cubocore.KeyboardLayouts", QDBusConnection::sessionBus() );
-
-	QDBusReply<QStringList> reply = iface.call( "getLayoutsList" );
-	if ( reply.isValid() ) {
-
-		QStringList lst = reply.value();
-		layouts.clear();
-
-		QListIterator<QString> itr( lst );
-
-		while ( itr.hasNext() ) {
-			QString layout_name = itr.next();
-			layouts << layout_name;
-		}
-	}
-};
+}
 
 void X11Keyboard::processKeyPress( unsigned int keyCode ) {
 
@@ -97,7 +68,7 @@ void X11Keyboard::processKeyPress( unsigned int keyCode ) {
 	sendKey( keyCode );
 	emit keyProcessComplete( keyCode );
 	groupTimer->start();
-};
+}
 
 void X11Keyboard::sendKey( unsigned int keycode ) {
 
@@ -107,28 +78,26 @@ void X11Keyboard::sendKey( unsigned int keycode ) {
 	Display *display = QX11Info::display();
 	XGetInputFocus( display, &currentFocus, &revertTo );
 
-	QListIterator<VButton *> itr( modKeys );
-
-	while ( itr.hasNext() ) {
-		VButton *mod = itr.next();
-		if ( mod->isChecked() ) {
-			XTestFakeKeyEvent( display, mod->getKeyCode(), true, 2 );
-		}
-	}
+	// QListIterator<VButton *> itr( modKeys );
+	// while ( itr.hasNext() ) {
+		// VButton *mod = itr.next();
+		// if ( mod->isChecked() ) {
+			// XTestFakeKeyEvent( display, mod->getKeyCode(), true, 2 );
+		// }
+	// }
 
 	XTestFakeKeyEvent( display, keycode, true, 2 );
 	XTestFakeKeyEvent( display, keycode, false, 2 );
 
-	itr.toFront();
-	while ( itr.hasNext() ) {
-		VButton *mod = itr.next();
-		if ( mod->isChecked() ) {
-			XTestFakeKeyEvent( display, mod->getKeyCode(), false, 2 );
-		}
-	}
+	// itr.toFront();
+	// while ( itr.hasNext() ) {
+		// VButton *mod = itr.next();
+		// if ( mod->isChecked() )
+			// XTestFakeKeyEvent( display, mod->getKeyCode(), false, 2 );
+	// }
 
 	XFlush( display );
-};
+}
 
 bool X11Keyboard::queryModKeyState( KeySym iKey ) {
 
@@ -141,14 +110,18 @@ bool X11Keyboard::queryModKeyState( KeySym iKey ) {
 
 	XModifierKeymap* map = XGetModifierMapping( display );
 	KeyCode keyCode = XKeysymToKeycode( display, iKey );
-	if ( keyCode == NoSymbol ) return false;
+
+	if ( keyCode == NoSymbol )
+		return false;
+
 	for ( int i = 0; i < 8; ++i ) {
-		if ( map->modifiermap[map->max_keypermod * i] == keyCode ) {
+		if ( map->modifiermap[map->max_keypermod * i] == keyCode )
 			iKeyMask = 1 << i;
-		}
 	}
+
 	XQueryPointer( display, DefaultRootWindow( display ), &wDummy1, &wDummy2, &iDummy3, &iDummy4, &iDummy5, &iDummy6, &iMask );
 	XFreeModifiermap( map );
+
 	return ( ( iMask & iKeyMask ) != 0 );
 }
 
@@ -163,34 +136,10 @@ void X11Keyboard::queryModState() {
 	groupState.insert( "capslock", curr_caps_state );
 	groupState.insert( "numlock", curr_num_state );
 
-	if ( curr_caps_state != caps_state || curr_num_state != num_state ) {
-
+	if ( curr_caps_state != caps_state || curr_num_state != num_state )
 		emit groupStateChanged( groupState );
-	}
-
 }
 
-
-void X11Keyboard::layoutChanged() {
-
-	//std::cerr << "LayoutChanged" << std::endl;
-
-	QDBusInterface iface( "org.cubocore.keyboard", "/Layouts", "org.cubocore.KeyboardLayouts", QDBusConnection::sessionBus() );
-
-	QDBusReply<QString> reply = iface.call( "getCurrentLayout" );
-
-	if ( reply.isValid() ) {
-		QString current_layout = reply.value();
-		layout_index = layouts.indexOf( current_layout );
-		emit layoutUpdated( layout_index, layouts.at( layout_index ) );
-	}
-
-	else {
-		layout_index = 0;
-		emit layoutUpdated( 0, "us" );
-	}
-
-}
 void X11Keyboard::textForKeyCode( unsigned int keyCode, ButtonText& text ) {
 
 	if ( keyCode==0 ) {

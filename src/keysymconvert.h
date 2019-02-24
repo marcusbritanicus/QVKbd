@@ -8,9 +8,9 @@
 #define KEYSYM2UCS_H
 
 #include <X11/X.h>
+#include "fixx11h.h"
 
 class KeySymConvert {
-
 	public:
 		long convert(KeySym keysym);
 };

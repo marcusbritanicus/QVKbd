@@ -1,9 +1,0 @@
-[Desktop Entry]
-Name=QVKbd
-Exec=qvkbd
-Icon=preferences-desktop-keyboard
-Type=Application
-Comment=A virtual keyboard X11 based on Qt
-GenericName=Virtual Keyboard
-Categories=Qt;KDE;Utility;Accessibility;
-Terminal=false
