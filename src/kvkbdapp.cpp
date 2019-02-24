@@ -170,12 +170,11 @@ KvkbdApp::KvkbdApp( int argc, char *argv[] ) : QApplication( argc, argv ) {
 	qDebug() << "App init complete.";
 }
 
-KvkbdApp::~KvkbdApp()
-{
+KvkbdApp::~KvkbdApp() {
 }
 
-void KvkbdApp::storeConfig()
-{
+void KvkbdApp::storeConfig() {
+
     // KConfigGroup cfg = KGlobal::config()->group( "" );
     // cfg.writeEntry( "visible", widget->isVisible() );
     // cfg.writeEntry( "geometry", widget->geometry() );
@@ -195,14 +194,13 @@ void KvkbdApp::storeConfig()
     // cfg.sync();
 }
 
-void KvkbdApp::autoResizeFont( bool mode )
-{
+void KvkbdApp::autoResizeFont( bool mode ) {
     widget->setProperty( "autoresfont", QVariant( mode ) );
     emit fontUpdated( widget->font() );
 }
 
-void KvkbdApp::setStickyModKeys( bool mode )
-{
+void KvkbdApp::setStickyModKeys( bool mode ) {
+
     widget->setProperty( "stickyModKeys", QVariant( mode ) );
 }
 
@@ -236,8 +234,8 @@ void KvkbdApp::buttonLoaded( VButton *btn ) {
         btn->setToolTip( tooltip );
 }
 
-void KvkbdApp::partLoaded( MainWidget *vPart, int total_rows, int total_cols )
-{
+void KvkbdApp::partLoaded( MainWidget *vPart, int total_rows, int total_cols ) {
+
     //cout << "Col Strech: " << total_cols << endl;
     // cout << "Row Strech: " << total_rows << endl;
     QString partName = vPart->property( "part" ).toString();
@@ -259,8 +257,8 @@ void KvkbdApp::partLoaded( MainWidget *vPart, int total_rows, int total_cols )
     QObject::connect( this, SIGNAL( fontUpdated( const QFont& ) ), vPart, SLOT( updateFont( const QFont& ) ) );
 }
 
-void KvkbdApp::keyProcessComplete( unsigned int )
-{
+void KvkbdApp::keyProcessComplete( unsigned int ) {
+
     if ( widget->property( "stickyModKeys" ).toBool() ) return;
     QListIterator<VButton *> itr( modKeys );
     while ( itr.hasNext() ) {
@@ -272,6 +270,8 @@ void KvkbdApp::keyProcessComplete( unsigned int )
 }
 
 void KvkbdApp::buttonAction( const QString &action ) {
+
+	qDebug() << "buttonAction(...)";
 
 	if ( QString::compare( action , "toggleVisibility" )==0 )
 		widget->toggleVisibility();
@@ -293,8 +293,10 @@ void KvkbdApp::buttonAction( const QString &action ) {
     }
 }
 
-void KvkbdApp::toggleExtension()
-{
+void KvkbdApp::toggleExtension() {
+
+	qDebug() << "Toggle extension";
+
     MainWidget *prt = parts.value( "extension" );
     if ( prt->isVisible() ) {
         prt->hide();

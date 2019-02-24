@@ -30,7 +30,5 @@ int main( int argc, char **argv ) {
 
 	KvkbdApp *app = new KvkbdApp(  argc, argv  );
 
-	qDebug() << "Hello";
-
 	return app->exec();
 };

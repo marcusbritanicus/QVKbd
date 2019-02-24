@@ -17,98 +17,94 @@ using namespace std;
 
 #include <QX11Info>
 
-DragWidget::DragWidget(QWidget *parent) :
-    QWidget(parent),  dragged(false), moved(false), locked(false)
-{
-    setAttribute(Qt::WA_TranslucentBackground);
+DragWidget::DragWidget( QWidget *parent ) : QWidget( parent ), dragged( false ), moved( false ), locked( false ) {
+
+	setAttribute( Qt::WA_TranslucentBackground );
 }
 
-DragWidget::~DragWidget()
-{
+DragWidget::~DragWidget() {
 
 }
 
-void DragWidget::blurBackground(bool blurEnabled)
-{
-  this->setProperty("blurBackground", QVariant(blurEnabled));
+void DragWidget::blurBackground( bool blurEnabled ) {
+
+  this->setProperty( "blurBackground", QVariant( blurEnabled ) );
 
   Display *dpy = QX11Info::display();
-  Atom net_wm_blur_region = XInternAtom(dpy, "_KDE_NET_WM_BLUR_BEHIND_REGION", False);
+  Atom net_wm_blur_region = XInternAtom( dpy, "_KDE_NET_WM_BLUR_BEHIND_REGION", False );
 
-  if (blurEnabled) {
+  if ( blurEnabled ) {
 
-      XChangeProperty(dpy, this->winId(), net_wm_blur_region, XA_CARDINAL, 32, PropModeReplace, 0, 0);
-
+	  XChangeProperty( dpy, this->winId(), net_wm_blur_region, XA_CARDINAL, 32, PropModeReplace, 0, 0 );
   }
+
   else {
-      XDeleteProperty(dpy, this->winId(), net_wm_blur_region);
 
+	  XDeleteProperty( dpy, this->winId(), net_wm_blur_region );
   }
+
   repaint();
 }
-void DragWidget::setLocked(bool locked)
-{
-  this->locked = locked;
-}
-bool DragWidget::isLocked()
-{
-  return locked;
+
+void DragWidget::setLocked( bool locked ) {
+
+	this->locked = locked;
 }
 
-void DragWidget::mousePressEvent(QMouseEvent *e)
-{
+bool DragWidget::isLocked() {
 
-    if (locked) {
-        return;
-    }
-
-    gpress = e->globalPos();
-    dragged = true;
-    dragPoint = e->pos();
-
-
-
+	return locked;
 }
 
-void DragWidget::mouseMoveEvent(QMouseEvent *ev)
-{
+void DragWidget::mousePressEvent( QMouseEvent *e ) {
 
+	if ( locked ) {
+		return;
+	}
 
-    if (!dragged) return;
-
-    moved=true;
-
-    QPoint curr(ev->globalPos().x() - dragPoint.x(), ev->globalPos().y() - dragPoint.y());
-    move(curr);
-
+	gpress = e->globalPos();
+	dragged = true;
+	dragPoint = e->pos();
 }
 
-void DragWidget::mouseReleaseEvent(QMouseEvent *)
-{
+void DragWidget::mouseMoveEvent( QMouseEvent *ev ) {
 
-    dragged = false;
-    moved = false;
+	if ( !dragged )
+		return;
+
+	moved = true;
+
+	QPoint curr( ev->globalPos().x() - dragPoint.x(), ev->globalPos().y() - dragPoint.y() );
+	move( curr );
 }
 
-void DragWidget::paintEvent(QPaintEvent *)
-{
-    QStyleOption opt;
-    opt.initFrom(this);
-    QStylePainter p(this);
-    p.drawPrimitive(QStyle::PE_Widget, opt);
+void DragWidget::mouseReleaseEvent( QMouseEvent * ) {
+
+	dragged = false;
+	moved = false;
 }
 
-void DragWidget::toggleVisibility()
-{
-    if (isMinimized()) {
-        showNormal();
-        show();
-	raise();
-    }
-    else {
-        showMinimized();
-        hide();
-	lower();
-    }
+void DragWidget::paintEvent( QPaintEvent * ) {
 
+	QStyleOption opt;
+	opt.initFrom( this );
+	QStylePainter p( this );
+	p.drawPrimitive( QStyle::PE_Widget, opt );
+}
+
+void DragWidget::toggleVisibility() {
+
+	qDebug() << "toggleVisibility()";
+
+	if ( isMinimized() ) {
+		showNormal();
+		show();
+		raise();
+	}
+
+	else {
+		showMinimized();
+		hide();
+		lower();
+	}
 }
