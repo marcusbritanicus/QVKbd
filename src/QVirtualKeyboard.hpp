@@ -9,27 +9,30 @@
 #include <QPushButton>
 #include <QWidget>
 #include <QString>
-#include <QDebug>
+#include <QSystemTrayIcon>
+#include "QVirtualButton.hpp"
 
-class QKeyboardButton : public QPushButton {
+class QVKTrayIcon : public QSystemTrayIcon {
 	Q_OBJECT
 
 	public:
-		QKeyboardButton( unsigned int code, QString name, QWidget *parent );
+		QVKTrayIcon( QWidget *parent ) : QSystemTrayIcon( parent ) {
 
-		unsigned int keyCode() {
+			setIcon( QIcon( ":/resources/tray.png" ) );
+			show();
 
-			return value;
+			connect( this, SIGNAL( activated( QSystemTrayIcon::ActivationReason ) ), this, SLOT( activationHandler( QSystemTrayIcon::ActivationReason ) ) );
 		};
 
 	private Q_SLOTS:
-		void translateKeyStroke();
+		void activationHandler( QSystemTrayIcon::ActivationReason reason ) {
 
-	private:
-		unsigned int value;
+			if ( reason == QSystemTrayIcon::Trigger )
+				emit toggleShowHide();
+		};
 
 	Q_SIGNALS:
-		void sendKey( unsigned int );
+		void toggleShowHide();
 };
 
 class QVirtualKeyboard : public QWidget {
@@ -44,9 +47,22 @@ class QVirtualKeyboard : public QWidget {
 
 		void sendKey( unsigned int );
 
-		QList<unsigned int> modifierCodes;
-		QList<QKeyboardButton *> modifiers;
+		QList<QVirtualButton *> modifiers;
+
+		QPoint dragPoint;
+		QPoint gpress;
+
+		bool dragged;
+		bool moved;
+
+		QVKTrayIcon *trayIcon;
+
+	protected:
+		void mouseMoveEvent( QMouseEvent * );
+		void mousePressEvent( QMouseEvent * );
+		void mouseReleaseEvent( QMouseEvent * );
 
 	private Q_SLOTS:
 		void processKeyPress( unsigned int );
+		void toggleShowHide();
 };

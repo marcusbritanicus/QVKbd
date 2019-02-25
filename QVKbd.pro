@@ -3,7 +3,7 @@ TARGET = qvkbd
 
 VERSION = 1.0.0
 
-INCLUDEPATH += .
+INCLUDEPATH += . src
 
 greaterThan( QT_MAJOR_VERSION, 4 ) {
 	QT += widgets x11extras
@@ -13,7 +13,11 @@ LIBS += -lX11 -lXtst
 
 # Input
 HEADERS += src/QVirtualKeyboard.hpp
+HEADERS += src/QVirtualButton.hpp
+
 SOURCES += src/QVirtualKeyboard.cpp
+SOURCES += src/QVirtualButton.cpp
+SOURCES += src/Main.cpp
 
 RESOURCES += resources.qrc
 
