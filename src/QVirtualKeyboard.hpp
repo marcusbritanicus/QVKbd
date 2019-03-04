@@ -64,5 +64,6 @@ class QVirtualKeyboard : public QWidget {
 
 	private Q_SLOTS:
 		void processKeyPress( unsigned int );
+		void releaseLongPress();
 		void toggleShowHide();
 };

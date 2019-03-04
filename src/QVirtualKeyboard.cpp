@@ -38,6 +38,7 @@
 #include <QApplication>
 #include <QSettings>
 #include <QSystemTrayIcon>
+#include <QScreen>
 #include <QX11Info>
 
 #include <X11/extensions/XTest.h>
@@ -60,6 +61,7 @@ QVirtualKeyboard::QVirtualKeyboard( QWidget *parent ) : QWidget( parent ) {
 
 void QVirtualKeyboard::createKeyboard() {
 
+	setFont( QFont( "sans", 7 ) );
 	QSettings keymap( ":/resources/en_US.keymap", QSettings::NativeFormat );
 
 	QVBoxLayout *keyboardLyt = new QVBoxLayout();
@@ -75,11 +77,12 @@ void QVirtualKeyboard::createKeyboard() {
 
 		Q_FOREACH( QString key, keymap.value( "Order" ).toStringList() ) {
 
-			QString keyName = keymap.value( key ).toString();
+			QStringList keyNames = keymap.value( key ).toStringList();
 			unsigned int keyCode = key.toInt();
 
-			QVirtualButton *btn = new QVirtualButton( keyCode, keyName, this );
+			QVirtualButton *btn = new QVirtualButton( keyCode, keyNames, this );
 			connect( btn, SIGNAL( sendKey( unsigned int ) ), this, SLOT( processKeyPress( unsigned int ) ) );
+			connect( btn, SIGNAL( longPressed() ), this, SLOT( releaseLongPress() ) );
 
 			if ( btn->isModifier() )
 				modifiers << btn;
@@ -103,15 +106,16 @@ void QVirtualKeyboard::setWidgetProperties() {
 	setWindowTitle( "QVirtualKeyboard" );
 	setWindowIcon( QIcon( ":/resources/tray.png" ) );
 
-	setAttribute( Qt::WA_ShowWithoutActivating );
-	setWindowFlags( Qt::ToolTip | Qt::FramelessWindowHint | Qt::X11BypassWindowManagerHint );
+    setAttribute( Qt::WA_ShowWithoutActivating );
+    setWindowFlags( Qt::ToolTip | Qt::FramelessWindowHint | Qt::X11BypassWindowManagerHint );
 
-	QRect scrnSize = qApp->desktop()->availableGeometry();
-	int hpos = scrnSize.width() - 630;
-	int vpos = scrnSize.height() - 230;
+	QSize kbdSize = QSize( DEFAULT_KEY_WIDTH * 17 + 18, DEFAULT_KEY_HEIGHT * 6 + 18 );
+    QRect scrnSize = qApp->primaryScreen()->availableGeometry();
+    int hpos = scrnSize.width() - kbdSize.width();
+    int vpos = scrnSize.height() - kbdSize.height();
 
-	move( hpos, vpos );
-	setFixedSize( 630, 230 );
+    move( hpos, vpos );
+    setFixedSize( kbdSize );
 };
 
 void QVirtualKeyboard::sendKey( unsigned int keycode ) {
@@ -143,27 +147,6 @@ void QVirtualKeyboard::sendKey( unsigned int keycode ) {
 	XFlush( display );
 };
 
-void QVirtualKeyboard::processKeyPress( unsigned int keyCode ) {
-
-	sendKey( keyCode );
-
-	QListIterator<QVirtualButton *> itr( modifiers );
-	while ( itr.hasNext() ) {
-		QVirtualButton *mod = itr.next();
-		if ( mod->isChecked() )
-			mod->setChecked( false );
-	}
-};
-
-void QVirtualKeyboard::toggleShowHide() {
-
-	if ( isVisible() )
-		hide();
-
-	else
-		show();
-};
-
 void QVirtualKeyboard::mousePressEvent( QMouseEvent *mpEvent ) {
 
 	gpress = mpEvent->globalPos();
@@ -187,4 +170,41 @@ void QVirtualKeyboard::mouseReleaseEvent( QMouseEvent * ) {
 
 	dragged = false;
 	moved = false;
+};
+
+void QVirtualKeyboard::processKeyPress( unsigned int keyCode ) {
+
+	sendKey( keyCode );
+
+	QListIterator<QVirtualButton *> itr( modifiers );
+	while ( itr.hasNext() ) {
+		QVirtualButton *mod = itr.next();
+		if ( mod->isChecked() )
+			mod->setChecked( false );
+	}
+};
+
+void QVirtualKeyboard::toggleShowHide() {
+
+	if ( isVisible() )
+		hide();
+
+	else
+		show();
+};
+
+void QVirtualKeyboard::releaseLongPress() {
+
+	QVirtualButton *btn = qobject_cast<QVirtualButton*>( sender() );
+	unsigned int keyCode = btn->keyCode();
+
+	/* Virtual pressing of Left Shift to simulate Shift + Key */
+	QListIterator<QVirtualButton *> itr( modifiers );
+	while ( itr.hasNext() ) {
+		QVirtualButton *mod = itr.next();
+		if ( mod->keyCode() == 50 )
+			mod->setChecked( true );
+	}
+
+	processKeyPress( keyCode );
 };

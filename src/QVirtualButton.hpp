@@ -13,12 +13,16 @@
 #include <QMouseEvent>
 #include <QLabel>
 #include <QMap>
+#include <QTimer>
+
+static const int DEFAULT_KEY_WIDTH = 32;
+static const int DEFAULT_KEY_HEIGHT = 32;
 
 class QVirtualButton : public QLabel {
 	Q_OBJECT
 
 	public:
-		QVirtualButton( unsigned int code, QString name, QWidget *parent );
+		QVirtualButton( unsigned int code, QStringList names, QWidget *parent );
 
 		/* X11 KeyCode for a given key */
 		unsigned int keyCode();
@@ -38,9 +42,16 @@ class QVirtualButton : public QLabel {
 		/* Set/Unset the key pressed state */
 		void setChecked( bool );
 
+		/* Double text for keys */
+		void setText( QStringList );
+
+		/* Key width for widget width */
+		static void idealKeyWidth( int );
+
 	private:
 		/* Key label */
 		QString mName;
+		QString mNameAlt;
 
 		/* X11 KeyCode for a given Key */
 		unsigned int mKeyCode;
@@ -54,16 +65,24 @@ class QVirtualButton : public QLabel {
 		/* Checkable flag */
 		bool mCheckable;
 
+		/* Pressed flag */
+		bool mPressed;
+
 		/* Checkable flag */
 		static bool mInitDone;
 
 		/* Color of the button */
 		QColor mColor;
 
+		/* Timer for long press */
+		QTimer *longPressTimer;
+
+		/* Modifiers and Keys with double values */
+		static QList<unsigned int> modifiers;
+		static QList<unsigned int> doubleKeys;
+
 		/* Init static numbers */
 		static void initStaticMembers();
-
-		static QList<unsigned int> modifiers;
 
 		/* This has the relative size ratios for various keys */
 		/* In case we use a scalable keyboard, we can use this object*/
@@ -76,8 +95,12 @@ class QVirtualButton : public QLabel {
 		/* Tab: Sky Blue, Caps Lock: Orange, Functions: Dark Blue */
 		static QMap<unsigned int, QColor> ColorKeyMap;
 
+	public Q_SLOTS:
+		/* Auto-release key on long press */
+		void autoReleaseKey();
+
 	private Q_SLOTS:
-		/* s */
+		/* Auto-set CapsLock state */
 		void setCapsLockState();
 
 	protected:
@@ -87,10 +110,16 @@ class QVirtualButton : public QLabel {
 		/* mouseReleaseEvent to simulate click */
 		void mouseReleaseEvent( QMouseEvent * );
 
+		/* paintEvent to have double labels */
+		void paintEvent( QPaintEvent *pEvent );
+
 	Q_SIGNALS:
 		/* Signal when the key is pressed */
 		void sendKey( unsigned int );
 
 		/* clicked() signal */
 		void clicked();
+
+		/* enableVirtualShift() signal */
+		void longPressed();
 };

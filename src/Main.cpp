@@ -32,6 +32,8 @@ int main( int argc, char **argv ) {
 	QApplication app( argc, argv );
 	app.setApplicationName( "QVirtualKeyboard" );
 
+	qRegisterMetaTypeStreamOperators<QList<int> >( "QList<int>" );
+
 	QVirtualKeyboard Gui;
 	Gui.show();
 

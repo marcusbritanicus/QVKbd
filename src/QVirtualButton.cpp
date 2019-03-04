@@ -30,27 +30,31 @@
 // Local Headers
 #include "QVirtualButton.hpp"
 
+#include <QDebug>
 #include <QWidget>
 #include <QTimer>
+#include <QPainter>
 #include <QX11Info>
 
 #define XK_Caps_Lock 0xffe5
 
-const int DEFAULT_KEY_WIDTH = 36;
-const int DEFAULT_KEY_HEIGHT = 36;
+Q_DECLARE_METATYPE( QList<int> )
 
 QMap<unsigned int, QSizeF> QVirtualButton::SizeKeyMap = QMap<unsigned int, QSizeF>();
 QMap<unsigned int, QColor> QVirtualButton::ColorKeyMap = QMap<unsigned int, QColor>();
 
-QList<unsigned int> QVirtualButton::modifiers = QList<unsigned int>() << 50 << 62 << 37 << 133 << 64 << 108 << 135 << 109;
+QList<unsigned int> QVirtualButton::modifiers = QList<unsigned int>();
+QList<unsigned int> QVirtualButton::doubleKeys = QList<unsigned int>();
+
 bool QVirtualButton::mInitDone = false;
 
-QVirtualButton::QVirtualButton( unsigned int code, QString name, QWidget *parent ) : QLabel( parent ) {
+QVirtualButton::QVirtualButton( unsigned int code, QStringList names, QWidget *parent ) : QLabel( parent ) {
 
 	/* Flags and state init */
 	mModifier = false;
 	mChecked = false;
 	mCheckable = false;
+	mPressed = false;
 	mColor = QColor( Qt::black );
 
 	/* X11 KeyCode */
@@ -81,9 +85,7 @@ QVirtualButton::QVirtualButton( unsigned int code, QString name, QWidget *parent
 	setStyleSheet( QString( "color: %1; border: 0.5px solid %1; border-radius: 2px;" ).arg( mColor.name() ) );
 
 	/* Name of the key */
-	mName = QString( name );
-	setText( mName );
-	setAlignment( Qt::AlignCenter );
+	setText( names );
 
 	/* Enable checked state for modifiers */
 	if ( modifiers.contains( mKeyCode ) ) {
@@ -106,6 +108,15 @@ QVirtualButton::QVirtualButton( unsigned int code, QString name, QWidget *parent
 
 		timer->start();
 	}
+
+	longPressTimer = new QTimer( this );
+	longPressTimer->setSingleShot( true );
+	longPressTimer->setInterval( 300 );
+
+	if ( doubleKeys.contains( mKeyCode ) )
+		connect( longPressTimer, SIGNAL( timeout() ), this, SLOT( autoReleaseKey() ) );
+
+	setFont( QFont( "sans", 7 ) );
 };
 
 unsigned int QVirtualButton::keyCode() {
@@ -145,8 +156,26 @@ void QVirtualButton::setChecked( bool state ) {
 		);
 	}
 
-	else
+	else {
 		setStyleSheet( QString( "color: %1; border: 0.5px solid %1; border-radius: 2px;" ).arg( mColor.name() ) );
+	}
+
+	setFont( QFont( "sans", 7 ) );
+};
+
+void QVirtualButton::setText( QStringList names ) {
+
+	mName = names[ 0 ];
+	QLabel::setText( mName );
+
+	if ( names.length() > 1 ) {
+		setAlignment( Qt::AlignLeft | Qt::AlignBottom );
+		mNameAlt = names[ 1 ];
+	}
+
+	else {
+		setAlignment( Qt::AlignCenter );
+	}
 };
 
 void QVirtualButton::setCapsLockState() {
@@ -179,6 +208,28 @@ void QVirtualButton::setCapsLockState() {
 	}
 
 	XFreeModifiermap( map );
+
+	repaint();
+};
+
+void QVirtualButton::autoReleaseKey() {
+
+	if ( rect().contains( mapFromGlobal( QCursor::pos() ) ) ) {
+		emit clicked();
+		emit longPressed();
+	}
+
+	mPressed = false;
+
+	/* Stop long-press timer */
+	longPressTimer->stop();
+
+	/* Reset to original StyleSheet */
+	setStyleSheet( QString( "color: %1; border: 0.5px solid %1; border-radius: 2px;" ).arg( mColor.name() ) );
+
+	setFont( QFont( "sans", 7 ) );
+
+	repaint();
 };
 
 void QVirtualButton::mousePressEvent( QMouseEvent *mEvent ) {
@@ -191,10 +242,23 @@ void QVirtualButton::mousePressEvent( QMouseEvent *mEvent ) {
 		).arg( mColor.name() ).arg( mColor.red() ).arg( mColor.green() ).arg( mColor.blue() )
 	);
 
+	mPressed = true;
+	longPressTimer->start();
+
 	mEvent->accept();
+	setFont( QFont( "sans", 7 ) );
+
+	repaint();
 };
 
 void QVirtualButton::mouseReleaseEvent( QMouseEvent *mEvent ) {
+
+	/* To enable long-press keys */
+	if ( not mPressed )
+		return;
+
+	/* Stop long-press timer */
+	longPressTimer->stop();
 
 	/* Reset to original StyleSheet */
 	setStyleSheet( QString( "color: %1; border: 0.5px solid %1; border-radius: 2px;" ).arg( mColor.name() ) );
@@ -233,12 +297,39 @@ void QVirtualButton::mouseReleaseEvent( QMouseEvent *mEvent ) {
 	}
 
 	mEvent->accept();
+	setFont( QFont( "sans", 7 ) );
+
+	repaint();
+};
+
+void QVirtualButton::paintEvent( QPaintEvent *pEvent ) {
+
+	QLabel::paintEvent( pEvent );
+
+	QPainter *painter = new QPainter( this );
+
+	painter->save();
+	painter->setRenderHints( QPainter::Antialiasing );
+
+	QRect rectAlt = QRect( QPoint( size().width() / 2, 0 ), size() / 2 );
+	if ( mNameAlt.count() )
+		painter->drawText( rectAlt, Qt::AlignCenter, mNameAlt );
+
+	painter->restore();
+	painter->end();
 };
 
 void QVirtualButton::initStaticMembers() {
 
 	if ( mInitDone )
 		return;
+
+	modifiers << 50 << 62 << 37 << 133 << 64 << 108 << 135 << 109;
+
+	doubleKeys << 10 << 11 << 12 << 13 << 14 << 15 << 16 << 17 << 18 << 19 << 20 << 21 << 24 << 25;
+	doubleKeys << 26 << 27 << 28 << 29 << 30 << 31 << 32 << 33 << 34 << 35 << 38 << 39 << 40 << 41;
+	doubleKeys << 42 << 43 << 44 << 45 << 46 << 47 << 48 << 49 << 51 << 52 << 53 << 54 << 55 << 56;
+	doubleKeys << 57 << 58 << 59 << 60 << 61;
 
 	/* ToDo: we should replace this by a theme file read by QSettings */
 
