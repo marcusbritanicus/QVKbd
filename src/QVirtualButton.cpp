@@ -38,8 +38,6 @@
 
 #define XK_Caps_Lock 0xffe5
 
-Q_DECLARE_METATYPE( QList<int> )
-
 QMap<unsigned int, QSizeF> QVirtualButton::SizeKeyMap = QMap<unsigned int, QSizeF>();
 QMap<unsigned int, QColor> QVirtualButton::ColorKeyMap = QMap<unsigned int, QColor>();
 
@@ -81,8 +79,10 @@ QVirtualButton::QVirtualButton( unsigned int code, QStringList names, QWidget *p
 	}
 
 	/* Set Color */
-	mColor = ColorKeyMap.value( code, QColor( 0, 0, 0 ) );
-	setStyleSheet( QString( "color: %1; border: 0.5px solid %1; border-radius: 2px;" ).arg( mColor.name() ) );
+	if ( code != 888 ) {
+		mColor = ColorKeyMap.value( code, QColor( 0, 0, 0 ) );
+		setStyleSheet( QString( "color: %1; border: 0.5px solid %1; border-radius: 2px;" ).arg( mColor.name() ) );
+	}
 
 	/* Name of the key */
 	setText( names );
@@ -234,6 +234,10 @@ void QVirtualButton::autoReleaseKey() {
 
 void QVirtualButton::mousePressEvent( QMouseEvent *mEvent ) {
 
+    /* Disable clicking of 'blank' 888 key */
+	if ( mKeyCode == 888 )
+		return;
+
 	/* Set pressed styleSheet */
 	QColor hColor = mColor;
 	hColor.setAlpha( 0.3 );
@@ -259,6 +263,10 @@ void QVirtualButton::mouseReleaseEvent( QMouseEvent *mEvent ) {
 
 	/* Stop long-press timer */
 	longPressTimer->stop();
+
+    /* Disable clicking of 'blank' 888 key */
+	if ( mKeyCode == 888 )
+		return;
 
 	/* Reset to original StyleSheet */
 	setStyleSheet( QString( "color: %1; border: 0.5px solid %1; border-radius: 2px;" ).arg( mColor.name() ) );
