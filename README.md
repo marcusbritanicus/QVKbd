@@ -1,4 +1,4 @@
-# kvkbd
+# QVKbd - Qt Virtual Keyboard
 
 ## Virtual Keyboard based on Qt
 
