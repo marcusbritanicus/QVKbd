@@ -1,11 +1,12 @@
 QVirtualKeyboard v1.0.0
 
 UI
-	□ Beautify the UI with qss
-	✗ Enable other keyboard layouts
-
-Code
-	□ Document the code, specifically, what each line does when it comes to X11
+	□ Redesign the keyboard - paint the buttons instead of QVirtualButton
+	✓ Enable X11 backend
+	□ Enable Wayland backend
+	□ Option for mobile/desktop layouts
+	□ Option for compact/fixed layouts
+	□ DesQ OSK Rebrand
 
 Note:
 	✍ - Work in progress
